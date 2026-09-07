@@ -54,6 +54,12 @@ class FormalContext:
         object.__setattr__(self, "objects", tuple(map(str, self.objects)))
         object.__setattr__(self, "attributes", tuple(map(str, self.attributes)))
 
+        if len(set(self.objects)) != len(self.objects):
+            raise ValueError("Object names must be unique.")
+
+        if len(set(self.attributes)) != len(self.attributes):
+            raise ValueError("Attribute names must be unique.")
+
         incidence = np.asarray(self.incidence, dtype=bool)
 
         expected_shape = (len(self.objects), len(self.attributes))
@@ -64,6 +70,18 @@ class FormalContext:
             )
 
         object.__setattr__(self, "incidence", incidence)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, FormalContext):
+            return NotImplemented
+        return (
+            self.objects == other.objects
+            and self.attributes == other.attributes
+            and np.array_equal(self.incidence, other.incidence)
+        )
+
+    def __hash__(self) -> int:
+        return hash((self.objects, self.attributes, self.incidence.tobytes()))
 
     @property
     def n_objects(self) -> int:

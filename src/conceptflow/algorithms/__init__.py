@@ -16,6 +16,7 @@ from conceptflow.algorithms._registry import (
 )
 
 from conceptflow.algorithms.hasse import compute_hasse_edges, is_cover
+from conceptflow.algorithms.implications import Implication, compute_canonical_basis
 from conceptflow.algorithms.order import strict_subconcept_of, subconcept_of
 
 from conceptflow.algorithms.reduction import (
@@ -36,6 +37,8 @@ __all__ = [
     "strict_subconcept_of",
     "is_cover",
     "compute_hasse_edges",
+    "Implication",
+    "compute_canonical_basis",
     "SUPPORTED_ENUMERATION_ALGORITHMS",
     "normalize_enumeration_algorithm",
     "ClarificationResult",

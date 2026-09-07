@@ -51,6 +51,7 @@ Examples:
 - CloseByOne
 - derivation operators
 - concept enumeration
+- canonical (Duquenne-Guigues) basis computation
 
 Responsibilities:
 
@@ -129,6 +130,25 @@ Responsibilities:
 - implication analysis,
 - rule quality measures,
 - symbolic metric computation.
+
+---
+
+## `rules/`
+
+Contains the sklearn-compatible wrapper around canonical-basis computation.
+
+Examples:
+
+- `ImplicationBasisEstimator`
+
+Responsibilities:
+
+- fitting the Duquenne-Guigues (stem) basis from binary data,
+- transforming objects into premise-satisfaction feature vectors.
+
+The underlying algorithm (`compute_canonical_basis`, `Implication`) lives in
+`algorithms/implications.py`; this module only adds the `fit`/`transform`
+estimator on top of it.
 
 ---
 

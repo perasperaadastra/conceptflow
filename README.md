@@ -64,6 +64,7 @@ including a full case study in [`examples/eurovision_nested_diagram.py`](example
 
 **scikit-learn estimators**
 - scikit-learn compatible lattice estimator
+- scikit-learn compatible implication (stem basis) estimator
 
 **Visualization**
 - Nested line diagrams (subdirect decomposition)
@@ -74,6 +75,9 @@ including a full case study in [`examples/eurovision_nested_diagram.py`](example
 
 **Metrics**
 - Basic support and confidence metrics
+
+**Rules**
+- Duquenne-Guigues (stem) basis / implication computation
 
 **Decomposition**
 - Ordinal two-factorization
@@ -514,6 +518,38 @@ additionally requires algorithms for:
 - incompatibility-graph reduction,
 - large-scale approximate ordinal factorizations.
 
+## Implications (stem basis)
+
+ConceptFlow computes the **Duquenne-Guigues (stem) basis**: the smallest set
+of exact implications logically equivalent to every implication that holds
+in a context.
+
+```python
+from conceptflow.rules import ImplicationBasisEstimator
+
+estimator = ImplicationBasisEstimator(output="dataframe")
+features = estimator.fit_transform(ctx)  # one bool column per implication
+
+for implication in estimator.get_implications():
+    print(
+        implication.premise_names(estimator.context_),
+        "->",
+        implication.conclusion_names(estimator.context_),
+    )
+```
+
+`fit` computes the basis (`get_implications()` returns it as `Implication`
+objects); `transform` re-derives, for any object (not just the ones it was
+fit on), which implications' premises that object's own attributes satisfy —
+one boolean feature per implication. The underlying algorithm
+(`conceptflow.algorithms.compute_canonical_basis`) enumerates candidate
+attribute sets smallest-first and checks each against the standard
+pseudo-intent definition; see
+[docs/nested_diagram_tutorial.md](docs/nested_diagram_tutorial.md) for how
+implications relate to hollow nodes in a nested diagram, and
+[examples/eurovision_nested_diagram.py](examples/eurovision_nested_diagram.py)
+for a full worked example.
+
 ## Design philosophy
 
 ConceptFlow separates:
@@ -547,6 +583,7 @@ Examples include:
 - `ConceptualScaler`
 - `ConceptMembershipEncoder`
 - `ConceptLatticeEstimator`
+- `ImplicationBasisEstimator`
 - `ExactOrdinalTwoFactorizer`
 
 ConceptFlow is inspired by the design philosophy of projects such as
@@ -556,10 +593,14 @@ Analysis and symbolic data analysis.
 Because FCA works with symbolic and order-theoretic structures rather than
 purely numerical arrays, not all components are expected to satisfy the full
 `sklearn.utils.estimator_checks.check_estimator` suite. Concretely,
-`ConceptualScaler`, `ConceptMembershipEncoder`, and `ConceptLatticeEstimator`
-each pass every check except `check_transformer_preserve_dtypes`, since all
-three always output `bool` (concept membership and scaled attributes are
-yes/no predicates, not values to dtype-cast).
+`ConceptualScaler`, `ConceptMembershipEncoder`, `ConceptLatticeEstimator`, and
+`ImplicationBasisEstimator` each pass every check except
+`check_transformer_preserve_dtypes`, since all four always output `bool`
+(concept membership, scaled attributes, and premise-satisfaction indicators
+are yes/no predicates, not values to dtype-cast). `ConceptualScaler`
+additionally xfails `check_fit_idempotent` for `NominalScale`-based
+configurations, since a nominal scale's vocabulary is fixed at fit time by
+design (see the note in `tests/test_check_estimator.py`).
 
 Core FCA structures such as:
 
@@ -595,6 +636,9 @@ feature_extraction/
 
 metrics/
     FCA metrics and implication measures
+
+rules/
+    Duquenne-Guigues (stem) basis computation and its sklearn estimator
 
 decomposition/
     Ordinal factorization and FCA decomposition methods

@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import numpy as np
+
 from conceptflow.core import FormalContext
 
 
@@ -37,14 +39,21 @@ def read_cxt(path: str | Path) -> FormalContext:
     except ValueError as exc:
         raise ValueError("Invalid .cxt file: object/attribute counts invalid.") from exc
 
-    expected_min_lines = 4 + n_objects + n_attributes + n_objects
-    if len(lines) < expected_min_lines:
+    # The Burmeister format places a blank separator line before the object
+    # list, but some files omit it. Disambiguate using the total line count
+    # (which is fully determined by n_objects/n_attributes) rather than by
+    # sniffing whether line 4 is blank -- that heuristic misfires when the
+    # first object's name legitimately IS the empty string.
+    expected_without_separator = 4 + n_objects + n_attributes + n_objects
+    expected_with_separator = expected_without_separator + 1
+
+    if len(lines) == expected_with_separator:
+        object_start = 5
+    elif len(lines) == expected_without_separator:
+        object_start = 4
+    else:
         raise ValueError("Invalid .cxt file: file ended too early.")
 
-    object_start = 4
-
-    if len(lines) > object_start and lines[object_start] == "":
-        object_start += 1
     attribute_start = object_start + n_objects
     incidence_start = attribute_start + n_attributes
 
@@ -82,10 +91,15 @@ def read_cxt(path: str | Path) -> FormalContext:
             ]
         )
 
+    if incidence:
+        incidence_array = np.array(incidence, dtype=bool)
+    else:
+        incidence_array = np.empty((n_objects, n_attributes), dtype=bool)
+
     return FormalContext(
         objects=objects,
         attributes=attributes,
-        incidence=incidence,
+        incidence=incidence_array,
     )
 
 

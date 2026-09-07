@@ -747,10 +747,13 @@ definitional bottom) can be traced to at least one basis implication whose premi
 satisfied by the node's combined attribute set.
 
 The stem basis can be computed directly from the combined context $K$ using the
-pseudo-intent algorithm. Because $K$ is never explicitly built in the ConceptFlow
-implementation, a practical approach is to construct the combined incidence matrix from
-the two factor contexts and run the pseudo-intent enumeration on that matrix, as
-demonstrated in `examples/eurovision_nested_diagram.py`.
+pseudo-intent algorithm -- implemented in ConceptFlow's core as
+`conceptflow.algorithms.compute_canonical_basis`, with an sklearn-compatible
+wrapper at `conceptflow.rules.ImplicationBasisEstimator`. Because $K$ is never
+explicitly built elsewhere in the nested-diagram pipeline, a practical
+approach is to construct the combined incidence matrix from the two factor
+contexts and run `compute_canonical_basis` (or fit `ImplicationBasisEstimator`)
+on that matrix, as demonstrated in `examples/eurovision_nested_diagram.py`.
 
 ---
 

@@ -100,11 +100,26 @@ class NominalScale(Scale):
         return [f"{self.source_attribute}={value}" for value in values]
 
     def encode_value(self, value: Any, mvc) -> dict[str, bool]:
+        """
+        Encode one value using the vocabulary of ``mvc``.
+
+        ``mvc`` should be the many-valued context this scale was fit on, not
+        arbitrary transform-time data -- callers (e.g. ``ConceptualScaler``)
+        are responsible for always passing the fit-time context here so the
+        vocabulary (and therefore the generated attribute names) stays fixed
+        between fit and transform.
+        """
         attrs = self.binary_attributes(mvc)
-        return {
-            attr: attr == f"{self.source_attribute}={value}"
-            for attr in attrs
-        }
+        target = f"{self.source_attribute}={value}"
+
+        if target not in attrs:
+            raise ValueError(
+                f'Value {value!r} for attribute "{self.source_attribute}" was '
+                f"not part of the vocabulary this scale was fit on. Known "
+                f"values: {sorted(mvc.unique_values(self.source_attribute), key=str)}."
+            )
+
+        return {attr: attr == target for attr in attrs}
 
 
 class ContranominalScale(Scale):
@@ -127,11 +142,23 @@ class ContranominalScale(Scale):
         return [f"{self.source_attribute}!={value}" for value in values]
 
     def encode_value(self, value: Any, mvc) -> dict[str, bool]:
+        """
+        Encode one value using the vocabulary of ``mvc``.
+
+        See ``NominalScale.encode_value`` for the fit-time-vs-transform-time
+        contract ``mvc`` must satisfy here.
+        """
         attrs = self.binary_attributes(mvc)
-        return {
-            attr: attr != f"{self.source_attribute}!={value}"
-            for attr in attrs
-        }
+        target = f"{self.source_attribute}!={value}"
+
+        if target not in attrs:
+            raise ValueError(
+                f'Value {value!r} for attribute "{self.source_attribute}" was '
+                f"not part of the vocabulary this scale was fit on. Known "
+                f"values: {sorted(mvc.unique_values(self.source_attribute), key=str)}."
+            )
+
+        return {attr: attr != target for attr in attrs}
 
 
 class DichotomicScale(Scale):

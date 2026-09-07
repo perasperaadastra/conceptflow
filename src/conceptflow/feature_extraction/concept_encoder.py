@@ -7,6 +7,7 @@ into machine-learning feature representations.
 
 from __future__ import annotations
 
+import numpy as np
 import pandas as pd
 from scipy import sparse
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -125,8 +126,19 @@ class ConceptMembershipEncoder(TransformerMixin, BaseEstimator):
         data = []
 
         for object_index in range(context.n_objects):
+            # Membership must be recomputed from this object's own attribute
+            # set, not looked up by position in the fit-time extents: a
+            # concept's extent only lists fit-time object indices, which are
+            # meaningless for new data (different objects, different order,
+            # or a different batch size). An object belongs to a concept iff
+            # its attribute set contains that concept's intent -- the
+            # standard FCA notion of concept membership, which generalizes
+            # correctly to objects the lattice was never fit on.
+            object_attributes = frozenset(
+                np.flatnonzero(context.incidence[object_index]).tolist()
+            )
             row = [
-                object_index in concept.extent
+                concept.intent <= object_attributes
                 for concept in self.concepts_
             ]
             data.append(row)

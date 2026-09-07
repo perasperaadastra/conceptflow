@@ -27,14 +27,14 @@ Output:
 """
 
 import json
-from itertools import combinations
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-from conceptflow import ExplorationBuilder, ManyValuedContext
+from conceptflow import ExplorationBuilder, FormalContext, ManyValuedContext
 from conceptflow.preprocessing import DichotomicScale, GeneralScale, ThresholdScale
+from conceptflow.rules import ImplicationBasisEstimator
 from conceptflow.visualization import debug_bottom_outer, plot_nested
 from conceptflow.visualization.dimflux_layout import lattice_to_graph_data_dimflux
 from conceptflow.visualization.nested import _compute_filled_pairs, _gamma_local
@@ -381,6 +381,14 @@ def compute_implication_basis(root) -> list[dict]:
     Compute the Duquenne-Guigues (stem) basis for the combined formal context
     K = K_outer | K_inner built from the ExplorationView.
 
+    The basis itself is computed by the sklearn-compatible
+    ``ImplicationBasisEstimator`` (see conceptflow.rules); everything below
+    just builds K = K_outer | K_inner (the apposition) to fit it on, and
+    enriches each fitted Implication with example-specific reporting fields
+    (which objects satisfy the premise, how the premise/conclusion split
+    across the outer/inner scale levels, and how many nested-diagram pairs
+    each implication explains).
+
     Returns a list of dicts, one per implication, each with:
       premise       — attribute names in the premise
       conclusion    — attribute names in the conclusion (extra attributes forced)
@@ -395,48 +403,23 @@ def compute_implication_basis(root) -> list[dict]:
 
     outer_names = list(outer_ctx.attributes)
     inner_names = list(inner_ctx.attributes)
-    all_names   = outer_names + inner_names
     n_outer     = len(outer_names)
-    n_all       = len(all_names)
     n_obj       = outer_ctx.n_objects
     obj_names   = list(outer_ctx.objects)
 
-    # Combined incidence matrix: rows = objects, cols = outer attrs then inner attrs.
-    inc = np.zeros((n_obj, n_all), dtype=bool)
-    inc[:, :n_outer] = outer_ctx.incidence
-    inc[:, n_outer:] = inner_ctx.incidence
+    # K = K_outer | K_inner: the apposition context (same objects, disjoint
+    # attribute sets side by side) that the canonical basis is computed over.
+    combined_incidence = np.zeros((n_obj, n_outer + len(inner_names)), dtype=bool)
+    combined_incidence[:, :n_outer] = outer_ctx.incidence
+    combined_incidence[:, n_outer:] = inner_ctx.incidence
 
-    def ext(A: frozenset) -> frozenset:
-        if not A:
-            return frozenset(range(n_obj))
-        mask = np.ones(n_obj, dtype=bool)
-        for a in A:
-            mask &= inc[:, a]
-        return frozenset(np.where(mask)[0])
+    combined_ctx = FormalContext(
+        objects=outer_ctx.objects,
+        attributes=tuple(outer_names + inner_names),
+        incidence=combined_incidence,
+    )
 
-    def clo(A: frozenset) -> frozenset:
-        S = ext(A)
-        if not S:
-            return frozenset(range(n_all))
-        mask = np.ones(n_all, dtype=bool)
-        for g in S:
-            mask &= inc[g, :]
-        return frozenset(np.where(mask)[0])
-
-    # All 2^n_all subsets — fine for n_all ≤ ~16.
-    all_sets = [frozenset(c)
-                for r in range(n_all + 1)
-                for c in combinations(range(n_all), r)]
-    closures = {A: clo(A) for A in all_sets}
-
-    # Pseudo-intents → Duquenne-Guigues basis.
-    # P is a pseudo-intent iff clo(P) ≠ P and for every pseudo-intent Q ⊊ P: clo(Q) ⊆ P.
-    pseudo_intents: dict[frozenset, frozenset] = {}
-    for P in sorted(all_sets, key=lambda s: (len(s), sorted(s))):
-        if closures[P] == P:
-            continue
-        if all(Qcl <= P for Q, Qcl in pseudo_intents.items() if Q < P):
-            pseudo_intents[P] = closures[P]
+    basis = ImplicationBasisEstimator().fit(combined_ctx).get_implications()
 
     # Pre-compute filled pairs for the diagram-impact count.
     gamma_o = _gamma_local(root.lattice)
@@ -451,15 +434,16 @@ def compute_implication_basis(root) -> list[dict]:
     bot_i = min(ic_list, key=lambda c: len(c.extent)).stable_id()
 
     results = []
-    for P, Pcl in sorted(pseudo_intents.items(), key=lambda x: (len(x[0]), sorted(x[0]))):
-        prem_names = [all_names[i] for i in sorted(P)]
-        conc_names = [all_names[i] for i in sorted(Pcl - P)]
-        objs       = sorted(obj_names[g] for g in ext(P))
+    for imp in basis:
+        P, Pcl_minus_P = imp.premise, imp.conclusion
+        prem_names = list(imp.premise_names(combined_ctx))
+        conc_names = list(imp.conclusion_names(combined_ctx))
+        objs = sorted(obj_names[g] for g in combined_ctx.attribute_derivation(P))
 
-        prem_outer = [all_names[i] for i in sorted(P)       if i < n_outer]
-        prem_inner = [all_names[i] for i in sorted(P)       if i >= n_outer]
-        conc_outer = [all_names[i] for i in sorted(Pcl - P) if i < n_outer]
-        conc_inner = [all_names[i] for i in sorted(Pcl - P) if i >= n_outer]
+        prem_outer = [name for i, name in zip(sorted(P), prem_names) if i < n_outer]
+        prem_inner = [name for i, name in zip(sorted(P), prem_names) if i >= n_outer]
+        conc_outer = [name for i, name in zip(sorted(Pcl_minus_P), conc_names) if i < n_outer]
+        conc_inner = [name for i, name in zip(sorted(Pcl_minus_P), conc_names) if i >= n_outer]
 
         # Count unfilled pairs for which this implication fires.
         n_unfilled = 0
@@ -471,7 +455,7 @@ def compute_implication_basis(root) -> list[dict]:
                 if ic.stable_id() == bot_i or ic.stable_id() in filled:
                     continue
                 combined = frozenset(oi[oc.stable_id()]) | frozenset(a + n_outer for a in ii[ic.stable_id()])
-                if P <= combined and not (Pcl <= combined):
+                if P <= combined and not ((P | Pcl_minus_P) <= combined):
                     n_unfilled += 1
 
         results.append(dict(

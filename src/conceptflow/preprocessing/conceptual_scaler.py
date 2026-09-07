@@ -186,7 +186,12 @@ class ConceptualScaler(TransformerMixin, BaseEstimator):
 
         for scale in self.scales_:
             value = mvc.get_value(obj, scale.source_attribute)
-            encoded = scale.encode_value(value, mvc)
+            # Vocabulary is always resolved from the fit-time context, even
+            # when scaling transform-time data, so scales whose binary
+            # attributes are derived from observed values (NominalScale,
+            # ContranominalScale) stay fixed between fit and transform
+            # instead of silently drifting with whatever data is passed in.
+            encoded = scale.encode_value(value, self.input_context_)
 
             overlap = set(binary_row) & set(encoded)
             if overlap:

@@ -35,6 +35,13 @@ def object_derivation(
     if not object_indices:
         return frozenset(range(context.n_attributes))
 
+    for index in object_indices:
+        if index < 0 or index >= context.n_objects:
+            raise IndexError(
+                f"Object index {index} is out of range for a context with "
+                f"{context.n_objects} objects."
+            )
+
     mask = context.incidence[list(object_indices), :].all(axis=0)
     return frozenset(np.flatnonzero(mask).tolist())
 
@@ -50,6 +57,13 @@ def attribute_derivation(
 
     if not attribute_indices:
         return frozenset(range(context.n_objects))
+
+    for index in attribute_indices:
+        if index < 0 or index >= context.n_attributes:
+            raise IndexError(
+                f"Attribute index {index} is out of range for a context with "
+                f"{context.n_attributes} attributes."
+            )
 
     mask = context.incidence[:, list(attribute_indices)].all(axis=1)
     return frozenset(np.flatnonzero(mask).tolist())

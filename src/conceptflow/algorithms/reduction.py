@@ -67,10 +67,10 @@ def clarify_context(context: FormalContext) -> ClarificationResult:
         for names in object_groups_by_row.values()
     }
 
-    object_clarified_incidence = np.array(
-        kept_object_rows,
-        dtype=bool,
-    )
+    if kept_object_rows:
+        object_clarified_incidence = np.array(kept_object_rows, dtype=bool)
+    else:
+        object_clarified_incidence = np.empty((0, context.n_attributes), dtype=bool)
 
     attribute_groups_by_column: dict[tuple[bool, ...], list[str]] = {}
 
@@ -91,10 +91,11 @@ def clarify_context(context: FormalContext) -> ClarificationResult:
         for names in attribute_groups_by_column.values()
     }
 
-    clarified_incidence = np.array(
-        kept_attribute_columns,
-        dtype=bool,
-    ).T
+    n_kept_objects = object_clarified_incidence.shape[0]
+    if kept_attribute_columns:
+        clarified_incidence = np.array(kept_attribute_columns, dtype=bool).T
+    else:
+        clarified_incidence = np.empty((n_kept_objects, 0), dtype=bool)
 
     clarified_context = FormalContext(
         objects=kept_objects,

@@ -154,6 +154,19 @@ class ExplorationBuilder:
     ) -> list[ExplorationView]:
         """
         Expand all selected expandable concepts of a parent view.
+
+        Parameters
+        ----------
+        include_top:
+            If False, skip the top concept (the one with every object in its
+            extent).
+
+        include_bottom:
+            Has no effect: a concept with an empty extent has no objects to
+            build a child view from, so it is always unexpandable (``expand()``
+            raises ValueError for it) regardless of this flag. Kept for
+            backward-compatible signatures; do not rely on it to include or
+            exclude anything.
         """
         children: list[ExplorationView] = []
 
@@ -162,11 +175,7 @@ class ExplorationBuilder:
         for concept in parent.lattice.concepts:
             extent_size = len(concept.extent)
 
-            is_bottom = extent_size == 0
             is_top = extent_size == parent_object_count
-
-            if is_bottom and not include_bottom:
-                continue
 
             if is_top and not include_top:
                 continue
