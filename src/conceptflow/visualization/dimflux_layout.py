@@ -11,12 +11,35 @@ import tempfile
 from dataclasses import replace
 from pathlib import Path
 
-from conceptflow.core import Concept, ConceptLattice
+from conceptflow.core import Concept, ConceptLattice, FormalContext
 from conceptflow.io import write_cxt
 from conceptflow.visualization.graph_data import GraphData, lattice_to_graph_data
 from conceptflow.visualization.dimflux.src.dim_flux.realizer import Realizer
 from conceptflow.visualization.dimflux.src.fdp.forces import ForceDirectedPlacement
 from conceptflow.visualization.dimflux.src.utils.variables import Variables
+
+
+def _sanitize_context(context: FormalContext) -> FormalContext:
+    """
+    Return a copy of ``context`` with synthetic object/attribute names.
+
+    DimFlux's internals (the Clojure JAR's text output, and several sympy
+    symbol expressions built by string concatenation) join names with plain
+    whitespace and no escaping, so any object/attribute name containing a
+    space -- or a Python/sympy keyword like "in" -- breaks parsing there.
+
+    The sanitized context keeps the exact same object/attribute order and
+    incidence as the original, so concepts computed from it have identical
+    extent/intent index sets and can be matched straight back to the
+    original lattice's own concepts by those indices (see
+    ``_concept_signature``) -- no name translation is needed once DimFlux
+    hands coordinates back.
+    """
+    return FormalContext(
+        objects=tuple(f"g{i}" for i in range(context.n_objects)),
+        attributes=tuple(f"m{i}" for i in range(context.n_attributes)),
+        incidence=context.incidence,
+    )
 
 
 def _concept_signature(concept: Concept) -> tuple[tuple[int, ...], tuple[int, ...]]:
@@ -65,7 +88,7 @@ def lattice_to_graph_data_dimflux(
         tmp_path = Path(tmp.name)
 
     try:
-        write_cxt(lattice.context, tmp_path)
+        write_cxt(_sanitize_context(lattice.context), tmp_path)
 
         vars_ = Variables(str(tmp_path), {})
 

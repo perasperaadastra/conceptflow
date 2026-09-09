@@ -70,3 +70,32 @@ def test_plot_lattice_dimflux_layout_returns_graph_data_with_coordinates():
     assert graph_data.metadata["layout"] == "dimflux"
     assert all(node.x is not None for node in graph_data.nodes)
     assert all(node.y is not None for node in graph_data.nodes)
+
+
+def test_lattice_to_graph_data_dimflux_handles_multi_word_names():
+    # Object/attribute names with spaces (and words that collide with
+    # Python/sympy keywords, e.g. "in") used to break DimFlux: the JAR's
+    # text output and several sympy symbol expressions join names with
+    # plain whitespace and no escaping. Regression test for that bug.
+    ctx = FormalContext.from_array(
+        np.array([
+            [1, 1, 0],
+            [1, 0, 1],
+            [0, 1, 1],
+        ]),
+        objects=["water weed", "field mouse", "garden snail"],
+        attributes=["lives in water", "needs chlorophyll", "can move"],
+    )
+    lattice = ConceptLattice.from_context(ctx)
+
+    graph_data = lattice_to_graph_data_dimflux(lattice)
+
+    assert len(graph_data.nodes) == lattice.n_concepts
+    for node in graph_data.nodes:
+        assert node.x is not None
+        assert node.y is not None
+
+    # The real (space-containing) names must still show up in the output --
+    # sanitizing names for DimFlux internally must not leak into labels.
+    all_labels = " ".join(node.label for node in graph_data.nodes)
+    assert "lives in water" in all_labels or "needs chlorophyll" in all_labels or "can move" in all_labels

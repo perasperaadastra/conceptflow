@@ -8,6 +8,38 @@ from pathlib import Path
 from conceptflow.visualization.dimflux.src.utils.variables import Variables
 
 
+def _match_known_tokens(text: str, vocabulary: set) -> set:
+    '''
+    Segment a whitespace-joined string back into a set of known names.
+
+    The JAR prints Clojure set elements separated by plain spaces, with no
+    delimiter to tell apart a multi-word name (e.g. "lives in water") from
+    several single-word names in a row. Since the full set of valid names is
+    already known ahead of time, greedy longest-match word segmentation
+    against that vocabulary recovers the original names unambiguously for
+    any non-adversarial (non self-overlapping) label set.
+    '''
+    words = text.split()
+    matched: set = set()
+    i = 0
+    n = len(words)
+
+    while i < n:
+        for length in range(n - i, 0, -1):
+            candidate = " ".join(words[i:i + length])
+            if candidate in vocabulary:
+                matched.add(candidate)
+                i += length
+                break
+        else:
+            raise ValueError(
+                f"Could not segment {' '.join(words[i:])!r} into known names "
+                f"from {sorted(vocabulary)}."
+            )
+
+    return matched
+
+
 class DimDraw():
     '''
     Disclaimer
@@ -107,9 +139,17 @@ class DimDraw():
                 x, y = coords.strip("()").split(", ")
                 # JAR outputs Clojure set literals: [#{obj1 obj2 ...} #{attr1 ...}]
                 # Parse both sets and union them to match the self.concepts dict.
+                # Elements are whitespace-joined with no other delimiter, so a
+                # blind str.split() breaks the moment an object/attribute name
+                # itself contains a space (e.g. "lives in water"). Since the
+                # full name vocabulary is already known (self.vars.G/M), greedy
+                # longest-match segmentation against it recovers the original
+                # multi-word names correctly.
                 groups = re.findall(r'#\{([^}]*)\}', concept)
-                extent_tokens = set(groups[0].split()) if groups and groups[0].strip() else set()
-                intent_tokens = set(groups[1].split()) if len(groups) > 1 and groups[1].strip() else set()
+                extent_text = groups[0] if groups else ""
+                intent_text = groups[1] if len(groups) > 1 else ""
+                extent_tokens = _match_known_tokens(extent_text, self.vars.G)
+                intent_tokens = _match_known_tokens(intent_text, self.vars.M)
                 concept_elements = extent_tokens | intent_tokens
 
                 node = next(
