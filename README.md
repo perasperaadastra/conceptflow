@@ -10,7 +10,11 @@ The goal is to combine FCA-native mathematical structures with modern Python mac
 
 ## Installation
 
-ConceptFlow is not yet on PyPI. Install from source:
+```bash
+pip install conceptflow
+```
+
+To install from source instead (e.g. for development):
 
 ```bash
 git clone https://github.com/anuragxorma/conceptflow
