@@ -1,12 +1,12 @@
 from conceptflow.decomposition.ordinal_factorization import (
-    IncidencePair,
     ExactOrdinalTwoFactorizer,
+    IncidencePair,
     OrdinalFactor,
     OrdinalTwoFactorization,
     bipartite_coloring,
     complement_context,
-    incompatibility_graph,
     incidence_pairs,
+    incompatibility_graph,
     is_ferrers_relation,
 )
 

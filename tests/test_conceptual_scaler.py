@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 import pytest
-from sklearn.pipeline import Pipeline
 from scipy import sparse
+from sklearn.pipeline import Pipeline
 
 from conceptflow import FormalContext, ManyValuedContext
 from conceptflow.cluster import ConceptLatticeEstimator

@@ -1,17 +1,17 @@
-import numpy as np
-
-from typing import Tuple
 from itertools import chain
+from typing import Tuple
+
+import numpy as np
 from scipy.optimize import minimize
 
-from conceptflow.visualization.dimflux.src.utils.variables import Variables
 from conceptflow.visualization.dimflux.src.fca.lattice import cover_relations
+from conceptflow.visualization.dimflux.src.utils.variables import Variables
 
 
 class ForceDirectedPlacement():
     '''
     Optimize the layout of a Concept Lattice using a force-directed approach.
-    This class minimizes an energy function composed of repulsive, attractive, 
+    This class minimizes an energy function composed of repulsive, attractive,
     and gravitational forces to improve diagram readability.
 
     Attributes
@@ -92,7 +92,7 @@ class ForceDirectedPlacement():
             Maximizes distance between nodes and non-incident edges.
         2. Attractive Energy (E_att):
             Minimizes edge lengths to keep related concepts close.
-        3. Gravitational Energy (E_grav): 
+        3. Gravitational Energy (E_grav):
             Constraints vectors to safe angles to ensure an upward-directed, readable diagram.
 
         Parameters
@@ -111,8 +111,16 @@ class ForceDirectedPlacement():
         self.e_grav, self.gradients_grav = self._gravitational_force(flat_vectors)
 
         # weights
-        self.energy = self.vars.w_rep * self.e_rep + self.vars.w_att * self.e_att + self.vars.w_grav * self.e_grav
-        self.gradients = self.vars.w_rep * self.gradients_rep + self.vars.w_att * self.gradients_att + self.vars.w_grav * self.gradients_grav
+        self.energy = (
+            self.vars.w_rep * self.e_rep
+            + self.vars.w_att * self.e_att
+            + self.vars.w_grav * self.e_grav
+        )
+        self.gradients = (
+            self.vars.w_rep * self.gradients_rep
+            + self.vars.w_att * self.gradients_att
+            + self.vars.w_grav * self.gradients_grav
+        )
 
         # conjugate gradient (expects a negative gradient)
         return self.energy, (self.gradients * -1).flatten()
@@ -126,7 +134,7 @@ class ForceDirectedPlacement():
         concept : int
             Concept to compute the position for
         vectors : Dict[int, np.array]
-            Dictionary assigning vectors to objects and attributes  
+            Dictionary assigning vectors to objects and attributes
 
         Returns
         -------
@@ -146,7 +154,8 @@ class ForceDirectedPlacement():
 
     def _repulsive_force(self, flat_vectors) -> Tuple[float, np.ndarray]:
         '''
-        Compute the Repulsive Energy, which maximizes the distance between nodes and non-incident edges.
+        Compute the Repulsive Energy, which maximizes the distance
+        between nodes and non-incident edges.
 
         Parameters
         ----------
@@ -194,24 +203,38 @@ class ForceDirectedPlacement():
 
                     # object distribution
                     if n_i in self.vars.G:
-                        F_G[1] = (n_i not in extent_v) and (n_i not in extent_v_1) and (n_i not in extent_v_2)
-                        F_G[2] = (n_i not in extent_v) and (n_i not in extent_v_1) and (n_i in extent_v_2)
-                        F_G[3] = (n_i not in extent_v) and (n_i in extent_v_1) and (n_i not in extent_v_2)
-                        F_G[4] = (n_i not in extent_v) and (n_i in extent_v_1) and (n_i in extent_v_2)
-                        F_G[5] = (n_i in extent_v) and (n_i not in extent_v_1) and (n_i not in extent_v_2)
-                        F_G[6] = (n_i in extent_v) and (n_i not in extent_v_1) and (n_i in extent_v_2)
-                        F_G[7] = (n_i in extent_v) and (n_i in extent_v_1) and (n_i not in extent_v_2)
+                        F_G[1] = ((n_i not in extent_v) and (n_i not in extent_v_1)
+                                  and (n_i not in extent_v_2))
+                        F_G[2] = ((n_i not in extent_v) and (n_i not in extent_v_1)
+                                  and (n_i in extent_v_2))
+                        F_G[3] = ((n_i not in extent_v) and (n_i in extent_v_1)
+                                  and (n_i not in extent_v_2))
+                        F_G[4] = ((n_i not in extent_v) and (n_i in extent_v_1)
+                                  and (n_i in extent_v_2))
+                        F_G[5] = ((n_i in extent_v) and (n_i not in extent_v_1)
+                                  and (n_i not in extent_v_2))
+                        F_G[6] = ((n_i in extent_v) and (n_i not in extent_v_1)
+                                  and (n_i in extent_v_2))
+                        F_G[7] = ((n_i in extent_v) and (n_i in extent_v_1)
+                                  and (n_i not in extent_v_2))
                         F_G[8] = (n_i in extent_v) and (n_i in extent_v_1) and (n_i in extent_v_2)
 
                     # attribute distribution
                     else:
-                        F_M[1] = (n_i not in intent_v) and (n_i not in intent_v_1) and (n_i not in intent_v_2)
-                        F_M[2] = (n_i not in intent_v) and (n_i not in intent_v_1) and (n_i in intent_v_2)
-                        F_M[3] = (n_i not in intent_v) and (n_i in intent_v_1) and (n_i not in intent_v_2)
-                        F_M[4] = (n_i not in intent_v) and (n_i in intent_v_1) and (n_i in intent_v_2)
-                        F_M[5] = (n_i in intent_v) and (n_i not in intent_v_1) and (n_i not in intent_v_2)
-                        F_M[6] = (n_i in intent_v) and (n_i not in intent_v_1) and (n_i in intent_v_2)
-                        F_M[7] = (n_i in intent_v) and (n_i in intent_v_1) and (n_i not in intent_v_2)
+                        F_M[1] = ((n_i not in intent_v) and (n_i not in intent_v_1)
+                                  and (n_i not in intent_v_2))
+                        F_M[2] = ((n_i not in intent_v) and (n_i not in intent_v_1)
+                                  and (n_i in intent_v_2))
+                        F_M[3] = ((n_i not in intent_v) and (n_i in intent_v_1)
+                                  and (n_i not in intent_v_2))
+                        F_M[4] = ((n_i not in intent_v) and (n_i in intent_v_1)
+                                  and (n_i in intent_v_2))
+                        F_M[5] = ((n_i in intent_v) and (n_i not in intent_v_1)
+                                  and (n_i not in intent_v_2))
+                        F_M[6] = ((n_i in intent_v) and (n_i not in intent_v_1)
+                                  and (n_i in intent_v_2))
+                        F_M[7] = ((n_i in intent_v) and (n_i in intent_v_1)
+                                  and (n_i not in intent_v_2))
                         F_M[8] = (n_i in intent_v) and (n_i in intent_v_1) and (n_i in intent_v_2)
 
                     # not possible by order relation
@@ -236,14 +259,18 @@ class ForceDirectedPlacement():
                         ##############################################
                         if F_G[4] or F_M[3] or F_M[4]:
                             # (1 / d(w, f)^2) * e(w_1 - w)
-                            gradients_rep[self.vars.element_map[n_i]] += (1 / dist**2) * ((w_1 - w) / dist)
+                            gradients_rep[self.vars.element_map[n_i]] += (
+                                (1 / dist**2) * ((w_1 - w) / dist)
+                            )
 
                         ##############################################
                         # F_{G_5} = F_{G_6} = F_{M_5}
                         ##############################################
                         elif F_G[5] or F_G[6] or F_M[5]:
                             # (1 / d(w, f)^2) * e(w - w_1)
-                            gradients_rep[self.vars.element_map[n_i]] += (1 / dist**2) * ((w - w_1) / dist)
+                            gradients_rep[self.vars.element_map[n_i]] += (
+                                (1 / dist**2) * ((w - w_1) / dist)
+                            )
 
                     ##################################################
                     # case 2:
@@ -259,19 +286,23 @@ class ForceDirectedPlacement():
                         ##############################################
                         if F_G[2] or F_G[4] or F_M[4]:
                             # (1 / d(w, f)^2) * e(w_2 - w)
-                            gradients_rep[self.vars.element_map[n_i]] += (1 / dist**2) * ((w_2 - w) / dist)
+                            gradients_rep[self.vars.element_map[n_i]] += (
+                                (1 / dist**2) * ((w_2 - w) / dist)
+                            )
 
                         ##############################################
                         # F_{G_5} = F_{M_5} = F_{M_7}
                         ##############################################
                         elif F_G[5] or F_M[5] or F_M[7]:
                             # (1 / d(w, f)^2) * e(w - w_2)
-                            gradients_rep[self.vars.element_map[n_i]] += (1 / dist**2) * ((w - w_2) / dist)
+                            gradients_rep[self.vars.element_map[n_i]] += (
+                                (1 / dist**2) * ((w - w_2) / dist)
+                            )
 
                     ##################################################
                     # case 3:
                     # (w_2 - w_1) \cdot (w - w_2) <= 0, (w - w_1) \cdot (w - w_2) >= 0
-                    # concept w lies above w_1 and below w_2 
+                    # concept w lies above w_1 and below w_2
                     ##################################################
                     else:
                         # perpendicular distance
@@ -282,7 +313,7 @@ class ForceDirectedPlacement():
 
                         # (w_1 - w) \times (w_2 - w) >= 0 -> w lies left of w_1w_2
                         # (w_1 - w) \times (w_2 - w) < 0 -> w lies right of w_1w_2
-                        l = 1 if cross_val >= 0 else -1
+                        sign = 1 if cross_val >= 0 else -1
 
                         # n_+(f)
                         x_f, y_f = f
@@ -293,43 +324,75 @@ class ForceDirectedPlacement():
                         # F_{G_2}
                         ##############################################
                         if F_G[2]:
-                            # (1 / d(w, f)^2) * -sqrt(((w_1 - w)^2 - |h|^2) / |f|^2) * ((n_+(f) * l) / |f|)
-                            gradients_rep[self.vars.element_map[n_i]] += (1 / dist**2) * -np.sqrt(abs((np.linalg.norm(w_1 - w)**2 - h**2)) / np.linalg.norm(f)**2) * ((n_plus_f * l) / np.linalg.norm(f))
+                            # (1 / d(w, f)^2) * -sqrt(((w_1 - w)^2 - |h|^2) / |f|^2)
+                            #   * ((n_+(f) * l) / |f|)
+                            gradients_rep[self.vars.element_map[n_i]] += (
+                                (1 / dist**2)
+                                * -np.sqrt(
+                                    abs((np.linalg.norm(w_1 - w)**2 - h**2)) / np.linalg.norm(f)**2
+                                )
+                                * ((n_plus_f * sign) / np.linalg.norm(f))
+                            )
 
                         ##############################################
                         # F_{M_3}
                         ##############################################
                         elif F_M[3]:
-                            # (1 / d(w, f)^2) * -sqrt(((w_2 - w)^2 - |h|^2) / |f|^2) * ((n_+(f) * l) / |f|)
-                            gradients_rep[self.vars.element_map[n_i]] += (1 / dist**2) * -np.sqrt(abs((np.linalg.norm(w_2 - w)**2 - h**2)) / np.linalg.norm(f)**2) * ((n_plus_f * l) / np.linalg.norm(f))
+                            # (1 / d(w, f)^2) * -sqrt(((w_2 - w)^2 - |h|^2) / |f|^2)
+                            #   * ((n_+(f) * l) / |f|)
+                            gradients_rep[self.vars.element_map[n_i]] += (
+                                (1 / dist**2)
+                                * -np.sqrt(
+                                    abs((np.linalg.norm(w_2 - w)**2 - h**2)) / np.linalg.norm(f)**2
+                                )
+                                * ((n_plus_f * sign) / np.linalg.norm(f))
+                            )
 
                         ##############################################
                         # F_{G_4} = F_{M_4}
                         ##############################################
                         elif F_G[4] or F_M[4]:
                             # (1 / d(w, f)^2) * -((n_+(f) * l) / |f|)
-                            gradients_rep[self.vars.element_map[n_i]] += (1 / dist**2) * -((n_plus_f * l) / np.linalg.norm(f))
+                            gradients_rep[self.vars.element_map[n_i]] += (
+                                (1 / dist**2) * -((n_plus_f * sign) / np.linalg.norm(f))
+                            )
 
                         ##############################################
                         # F_{G_5} = F_{M_5}
                         ##############################################
                         elif F_G[5] or F_M[5]:
                             # (1 / d(w, f)^2) * ((n_+(f) * l) / |f|)
-                            gradients_rep[self.vars.element_map[n_i]] += (1 / dist**2) * (n_plus_f * l) / np.linalg.norm(f)
+                            gradients_rep[self.vars.element_map[n_i]] += (
+                                (1 / dist**2) * (n_plus_f * sign) / np.linalg.norm(f)
+                            )
 
                         ##############################################
                         # F_{G_6}
                         ##############################################
                         elif F_G[6]:
-                            # (1 / d(w, f)^2) * sqrt(((w_2 - w)^2 - |h|^2) / |f|^2) * ((n_+(f) * l) / |f|)
-                            gradients_rep[self.vars.element_map[n_i]] += (1 / dist**2) * np.sqrt(abs((np.linalg.norm(w_2 - w)**2 - h**2)) / np.linalg.norm(f)**2) * ((n_plus_f * l) / np.linalg.norm(f))
+                            # (1 / d(w, f)^2) * sqrt(((w_2 - w)^2 - |h|^2) / |f|^2)
+                            #   * ((n_+(f) * l) / |f|)
+                            gradients_rep[self.vars.element_map[n_i]] += (
+                                (1 / dist**2)
+                                * np.sqrt(
+                                    abs((np.linalg.norm(w_2 - w)**2 - h**2)) / np.linalg.norm(f)**2
+                                )
+                                * ((n_plus_f * sign) / np.linalg.norm(f))
+                            )
 
                         ##############################################
                         # F_{M_7}
                         ##############################################
                         elif F_M[7]:
-                            # (1 / d(w, f)^2) * sqrt(((w_1 - w)^2 - |h|^2) / |f|^2) * ((n_+(f) * l) / |f|)
-                            gradients_rep[self.vars.element_map[n_i]] += (1 / dist**2) * np.sqrt(abs((np.linalg.norm(w_1 - w)**2 - h**2)) / np.linalg.norm(f)**2) * ((n_plus_f * l) / np.linalg.norm(f))
+                            # (1 / d(w, f)^2) * sqrt(((w_1 - w)^2 - |h|^2) / |f|^2)
+                            #   * ((n_+(f) * l) / |f|)
+                            gradients_rep[self.vars.element_map[n_i]] += (
+                                (1 / dist**2)
+                                * np.sqrt(
+                                    abs((np.linalg.norm(w_1 - w)**2 - h**2)) / np.linalg.norm(f)**2
+                                )
+                                * ((n_plus_f * sign) / np.linalg.norm(f))
+                            )
 
                 # 1 / d(w, f)
                 e_rep += 1.0 / dist
@@ -438,15 +501,27 @@ class ForceDirectedPlacement():
                     # angle too flat on the right side
                     if 0 <= phi_n_i <= phi_0_G:
                         # E_grav(n_i) = phi_n_i + cot(phi_n_i) sin(phi_0_G)^2 + E_0
-                        e_grav += phi_n_i + (np.cos(phi_n_i) / (np.sin(phi_n_i))) * (np.sin(phi_0_G)**2) + E_0
+                        e_grav += (
+                            phi_n_i
+                            + (np.cos(phi_n_i) / (np.sin(phi_n_i))) * (np.sin(phi_0_G)**2)
+                            + E_0
+                        )
 
                     # angle too flat on the left side
                     elif (np.pi - phi_0_G) <= phi_n_i <= np.pi:
                         # E_grav(m) = -phi_n_i - cot(phi_n_i) sin(phi_0)^2 + E_1
-                        e_grav += -phi_n_i - (np.cos(phi_n_i) / (np.sin(phi_n_i))) * (np.sin(phi_0_G)**2) + E_1
+                        e_grav += (
+                            -phi_n_i
+                            - (np.cos(phi_n_i) / (np.sin(phi_n_i))) * (np.sin(phi_0_G)**2)
+                            + E_1
+                        )
 
                     # n_-(n_i) * ((sin(phi_n_i)^2 - sin(phi_0_G)^2) / y(n_i)^2) * direction
-                    gradients_grav[n_i] += np.array([y, -x]) * ((np.sin(phi_n_i)**2 - np.sin(phi_0_G)**2) / y**2) * direction
+                    gradients_grav[n_i] += (
+                        np.array([y, -x])
+                        * ((np.sin(phi_n_i)**2 - np.sin(phi_0_G)**2) / y**2)
+                        * direction
+                    )
 
                 # wrong direction (downwards)
                 elif phi_n_i < 0:
@@ -472,15 +547,27 @@ class ForceDirectedPlacement():
                     # angle too flat on the right side
                     if -phi_0_M <= phi_n_i <= 0:
                         # E_grav(n_i) = phi_n_i + cot(phi_n_i) sin(phi_0_M)^2 + E_2
-                        e_grav += phi_n_i + (np.cos(phi_n_i) / (np.sin(phi_n_i))) * (np.sin(phi_0_M)**2) + E_2
+                        e_grav += (
+                            phi_n_i
+                            + (np.cos(phi_n_i) / (np.sin(phi_n_i))) * (np.sin(phi_0_M)**2)
+                            + E_2
+                        )
 
                     # angle too flat on the left side
                     elif -np.pi <= phi_n_i <= (-np.pi + phi_0_M):
                         # E_grav(m) = -phi_n_i - cot(phi_n_i) sin(phi_0)^2 + E_3
-                        e_grav += -phi_n_i - (np.cos(phi_n_i) / (np.sin(phi_n_i))) * (np.sin(phi_0_M)**2) + E_3
+                        e_grav += (
+                            -phi_n_i
+                            - (np.cos(phi_n_i) / (np.sin(phi_n_i))) * (np.sin(phi_0_M)**2)
+                            + E_3
+                        )
 
                     # n_-(n_i) * ((sin(phi_n_i)^2 - sin(phi_0_M)^2) / y(n_i)^2) * direction
-                    gradients_grav[n_i] += np.array([y, -x]) * ((np.sin(phi_n_i)**2 - np.sin(phi_0_M)**2) / y**2) * direction
+                    gradients_grav[n_i] += (
+                        np.array([y, -x])
+                        * ((np.sin(phi_n_i)**2 - np.sin(phi_0_M)**2) / y**2)
+                        * direction
+                    )
 
                 # wrong direction (upwards)
                 elif phi_n_i > 0:
@@ -495,7 +582,7 @@ class ForceDirectedPlacement():
 
     def _final_force(self):
         '''
-        Calculate the resulting decomposed forces for each concept 
+        Calculate the resulting decomposed forces for each concept
         at the end of the optimization. This is primarily for visualization.
         '''
         self.final_forces = {
@@ -509,11 +596,23 @@ class ForceDirectedPlacement():
 
         for c in self.vars.concepts:
             for g in self.vars.extents[c]:
-                self.final_forces['G_rep'][c] += self.gradients_rep[self.vars.element_map[g]] * self.vars.w_rep
-                self.final_forces['G_att'][c] += self.gradients_att[self.vars.element_map[g]] * self.vars.w_att
-                self.final_forces['G_grav'][c] += self.gradients_grav[self.vars.element_map[g]] * self.vars.w_grav
+                self.final_forces['G_rep'][c] += (
+                    self.gradients_rep[self.vars.element_map[g]] * self.vars.w_rep
+                )
+                self.final_forces['G_att'][c] += (
+                    self.gradients_att[self.vars.element_map[g]] * self.vars.w_att
+                )
+                self.final_forces['G_grav'][c] += (
+                    self.gradients_grav[self.vars.element_map[g]] * self.vars.w_grav
+                )
 
             for m in self.vars.intents[c]:
-                self.final_forces['M_rep'][c] += self.gradients_rep[self.vars.element_map[m]] * self.vars.w_rep
-                self.final_forces['M_att'][c] += self.gradients_att[self.vars.element_map[m]] * self.vars.w_att
-                self.final_forces['M_grav'][c] += self.gradients_grav[self.vars.element_map[m]] * self.vars.w_grav
+                self.final_forces['M_rep'][c] += (
+                    self.gradients_rep[self.vars.element_map[m]] * self.vars.w_rep
+                )
+                self.final_forces['M_att'][c] += (
+                    self.gradients_att[self.vars.element_map[m]] * self.vars.w_att
+                )
+                self.final_forces['M_grav'][c] += (
+                    self.gradients_grav[self.vars.element_map[m]] * self.vars.w_grav
+                )

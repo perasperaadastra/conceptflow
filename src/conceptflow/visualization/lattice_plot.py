@@ -9,7 +9,6 @@ from conceptflow.visualization.d3_backend import render_with_d3
 from conceptflow.visualization.dimflux_layout import lattice_to_graph_data_dimflux
 from conceptflow.visualization.graph_data import lattice_to_graph_data
 
-
 SUPPORTED_BACKENDS = {"graph_data", "d3"}
 SUPPORTED_LAYOUTS = {"none", "dimflux"}
 

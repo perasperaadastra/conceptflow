@@ -51,7 +51,9 @@ class ConceptMembershipEncoder(TransformerMixin, BaseEstimator):
         self.output = output
 
     @classmethod
-    def from_lattice(cls, lattice: CoreConceptLattice, output: str = "dataframe") -> "ConceptMembershipEncoder":
+    def from_lattice(
+        cls, lattice: CoreConceptLattice, output: str = "dataframe"
+    ) -> "ConceptMembershipEncoder":
         """
         Return a fitted encoder from a pre-computed ConceptLattice.
 

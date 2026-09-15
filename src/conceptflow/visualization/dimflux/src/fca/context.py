@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import itertools
-import pandas as pd
-
 from typing import Set, Tuple
+
+import pandas as pd
 
 from conceptflow.core.context import FormalContext
 from conceptflow.core.lattice import ConceptLattice

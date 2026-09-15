@@ -1,13 +1,12 @@
-import numpy as np
-
-from typing import Optional, Dict
 from dataclasses import dataclass
+from typing import Dict, Optional
+
+import numpy as np
 
 from conceptflow.core.context import FormalContext
 from conceptflow.core.lattice import ConceptLattice
-
-from conceptflow.visualization.dimflux.src.fca.context import *
-from conceptflow.visualization.dimflux.src.fca.lattice import *
+from conceptflow.visualization.dimflux.src.fca.context import attribute_closure, object_closure
+from conceptflow.visualization.dimflux.src.fca.lattice import all_extents, all_intents
 
 
 @dataclass

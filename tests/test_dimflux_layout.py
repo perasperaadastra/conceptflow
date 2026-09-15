@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 
 from conceptflow import ConceptLattice, FormalContext
 from conceptflow.visualization import lattice_to_graph_data_dimflux, plot_lattice
@@ -98,4 +97,8 @@ def test_lattice_to_graph_data_dimflux_handles_multi_word_names():
     # The real (space-containing) names must still show up in the output --
     # sanitizing names for DimFlux internally must not leak into labels.
     all_labels = " ".join(node.label for node in graph_data.nodes)
-    assert "lives in water" in all_labels or "needs chlorophyll" in all_labels or "can move" in all_labels
+    assert (
+        "lives in water" in all_labels
+        or "needs chlorophyll" in all_labels
+        or "can move" in all_labels
+    )

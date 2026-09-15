@@ -1,5 +1,4 @@
 import os
-
 import re
 import subprocess
 import tempfile
@@ -127,7 +126,8 @@ class DimDraw():
                 try:
                     self.vars.context.to_cxt(tmp_path)
                     res = subprocess.check_output(
-                        [java_bin, "-jar", str(jar_path), "-f", "dim-draw-coordinates", str(cxt_path)],
+                        [java_bin, "-jar", str(jar_path), "-f", "dim-draw-coordinates",
+                         str(cxt_path)],
                         text=True,
                         stderr=subprocess.STDOUT
                     )
@@ -159,7 +159,8 @@ class DimDraw():
 
                 if node is None:
                     raise ValueError(
-                        f"Could not match DimDraw concept output to a ConceptFlow concept: {concept}"
+                        f"Could not match DimDraw concept output to a "
+                        f"ConceptFlow concept: {concept}"
                     )
 
                 le_x[int(x)] = node

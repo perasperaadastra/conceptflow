@@ -3,8 +3,8 @@ import numpy as np
 from conceptflow import Concept, FormalContext
 from conceptflow.algorithms.enumeration import (
     enumerate_concepts_bruteforce,
-    enumerate_concepts_nextclosure,
     enumerate_concepts_closebyone,
+    enumerate_concepts_nextclosure,
 )
 
 

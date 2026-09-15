@@ -21,14 +21,12 @@ so ConceptualScaler declares tags.input_tags.allow_nan = True; this makes
 check_estimators_nan_inf pass rather than xfail.
 """
 
-import pytest
 from sklearn.utils.estimator_checks import parametrize_with_checks
 
 from conceptflow.cluster import ConceptLatticeEstimator
 from conceptflow.feature_extraction import ConceptMembershipEncoder
 from conceptflow.preprocessing import ConceptualScaler, NominalScale
 from conceptflow.rules import ImplicationBasisEstimator
-
 
 _BOOL_OUTPUT_XFAIL = (
     "Always outputs bool dtype regardless of input dtype — concept membership "

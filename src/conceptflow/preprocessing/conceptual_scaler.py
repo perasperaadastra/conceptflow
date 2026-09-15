@@ -7,12 +7,11 @@ using explicit conceptual scale definitions.
 
 from __future__ import annotations
 
-from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.utils.validation import check_is_fitted
-
 import numpy as np
 import pandas as pd
 from scipy import sparse
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.utils.validation import check_is_fitted
 
 from conceptflow.core import FormalContext, ManyValuedContext
 from conceptflow.preprocessing.scales import Scale

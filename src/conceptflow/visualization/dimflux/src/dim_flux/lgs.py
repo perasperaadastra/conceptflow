@@ -1,8 +1,8 @@
-import numpy as np
 
-from typing import Dict
 from collections import deque
-from sympy import symbols, Eq, solve, sympify, linear_eq_to_matrix
+from typing import Dict
+
+from sympy import Eq, linear_eq_to_matrix, solve, symbols, sympify
 
 from conceptflow.visualization.dimflux.src.utils.variables import Variables
 
@@ -49,12 +49,12 @@ class LinearEquationSolver:
         for c in self.vars.concepts:
             elements = self.vars.extents[c] | (self.vars.M - self.vars.intents[c])
             for i, dim in enumerate(self.dimensions):
-                l, r = tuple((
+                lhs, rhs = tuple((
                     (' + '.join(f'{dim}_{v}' for v in elements) if elements else '0'),
                     f'{self.coordinates[c][i]}'
                 ))
-                if f'{l} = {r}' != '0 = 0.0':
-                    self.equations.append(Eq(sympify(l), sympify(r)))
+                if f'{lhs} = {rhs}' != '0 = 0.0':
+                    self.equations.append(Eq(sympify(lhs), sympify(rhs)))
 
     def _solve(self, dim: str, node, expected: int):
         '''

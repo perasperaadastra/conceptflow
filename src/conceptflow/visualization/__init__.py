@@ -1,3 +1,8 @@
+from conceptflow.visualization.d3_backend import (
+    graph_data_to_d3_data,
+    render_graph_data_html,
+    render_with_d3,
+)
 from conceptflow.visualization.dimflux_layout import lattice_to_graph_data_dimflux
 from conceptflow.visualization.graph_data import (
     GraphData,
@@ -13,11 +18,6 @@ from conceptflow.visualization.nested import (
     exploration_view_to_nested_data,
     plot_nested,
     render_nested_html,
-)
-from conceptflow.visualization.d3_backend import (
-    graph_data_to_d3_data,
-    render_graph_data_html,
-    render_with_d3,
 )
 
 __all__ = [

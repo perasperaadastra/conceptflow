@@ -65,7 +65,7 @@ class ConceptLattice:
         Hasse diagram edges as ``(lower, upper)`` pairs.
         """
         return compute_hasse_edges(self.concepts)
-    
+
     def to_networkx(self):
         """
         Convert the concept lattice to a NetworkX directed graph.

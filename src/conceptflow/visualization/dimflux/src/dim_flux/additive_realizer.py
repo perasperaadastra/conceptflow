@@ -1,9 +1,8 @@
-from z3 import *
+from z3 import And, Int, Or, Real, Solver, sat
 
 from conceptflow.core.context import FormalContext
 from conceptflow.core.lattice import ConceptLattice
-
-from conceptflow.visualization.dimflux.src.fca.lattice import *
+from conceptflow.visualization.dimflux.src.fca.lattice import incomparability_graph
 
 
 class AdditiveRealizer:

@@ -7,8 +7,8 @@ intent such that A' = B and B' = A.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import hashlib
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True, order=True)

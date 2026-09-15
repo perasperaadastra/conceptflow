@@ -1,7 +1,7 @@
-import networkx as nx
-
-from typing import Tuple, Set, Dict
 from collections import deque
+from typing import Dict, Set, Tuple
+
+import networkx as nx
 
 from conceptflow.core.concept import Concept
 from conceptflow.core.lattice import ConceptLattice

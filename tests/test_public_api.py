@@ -59,8 +59,8 @@ def test_decomposition_public_api_imports():
         OrdinalTwoFactorization,
         bipartite_coloring,
         complement_context,
-        incompatibility_graph,
         incidence_pairs,
+        incompatibility_graph,
         is_ferrers_relation,
     )
     from conceptflow.decomposition.ordinal_factorization import Ord2Factor
@@ -141,13 +141,13 @@ def test_visualization_public_api_imports():
         GraphNode,
         HTMLFigure,
         exploration_view_to_nested_data,
+        graph_data_to_d3_data,
         lattice_to_graph_data,
         lattice_to_graph_data_dimflux,
         plot_lattice,
         plot_nested,
-        render_nested_html,
-        graph_data_to_d3_data,
         render_graph_data_html,
+        render_nested_html,
         render_with_d3,
     )
 
@@ -164,7 +164,7 @@ def test_visualization_public_api_imports():
     assert graph_data_to_d3_data is not None
     assert render_graph_data_html is not None
     assert render_with_d3 is not None
-    
+
 def test_exploration_public_api_imports():
     from conceptflow.exploration import (
         ExplorationBuilder,

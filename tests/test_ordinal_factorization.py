@@ -6,8 +6,8 @@ from conceptflow.decomposition import (
     ExactOrdinalTwoFactorizer,
     bipartite_coloring,
     complement_context,
-    incompatibility_graph,
     incidence_pairs,
+    incompatibility_graph,
     is_ferrers_relation,
 )
 from conceptflow.decomposition.ordinal_factorization import Ord2Factor

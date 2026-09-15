@@ -1,3 +1,7 @@
+from conceptflow.algorithms._registry import (
+    SUPPORTED_ENUMERATION_ALGORITHMS,
+    normalize_enumeration_algorithm,
+)
 from conceptflow.algorithms.derivation import (
     attribute_closure,
     attribute_derivation,
@@ -6,19 +10,12 @@ from conceptflow.algorithms.derivation import (
 from conceptflow.algorithms.enumeration import (
     enumerate_concepts,
     enumerate_concepts_bruteforce,
-    enumerate_concepts_nextclosure,
     enumerate_concepts_closebyone,
+    enumerate_concepts_nextclosure,
 )
-
-from conceptflow.algorithms._registry import (
-    SUPPORTED_ENUMERATION_ALGORITHMS,
-    normalize_enumeration_algorithm,
-)
-
 from conceptflow.algorithms.hasse import compute_hasse_edges, is_cover
 from conceptflow.algorithms.implications import Implication, compute_canonical_basis
 from conceptflow.algorithms.order import strict_subconcept_of, subconcept_of
-
 from conceptflow.algorithms.reduction import (
     ClarificationResult,
     clarified_context,

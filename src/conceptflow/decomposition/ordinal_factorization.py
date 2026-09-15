@@ -33,7 +33,6 @@ from sklearn.base import BaseEstimator
 from conceptflow.core import ConceptLattice, FormalContext
 from conceptflow.validation import check_binary_context_input
 
-
 IncidencePair = tuple[int, int]
 
 

@@ -1,12 +1,11 @@
 import numpy as np
 
 from conceptflow.core.lattice import ConceptLattice
-
-from conceptflow.visualization.dimflux.src.utils.variables import Variables
-from conceptflow.visualization.dimflux.src.dim_flux.dim_draw import DimDraw
-from conceptflow.visualization.dimflux.src.dim_flux.projection import Projection
-from conceptflow.visualization.dimflux.src.dim_flux.lgs import LinearEquationSolver
 from conceptflow.visualization.dimflux.src.dim_flux.additive_realizer import AdditiveRealizer
+from conceptflow.visualization.dimflux.src.dim_flux.dim_draw import DimDraw
+from conceptflow.visualization.dimflux.src.dim_flux.lgs import LinearEquationSolver
+from conceptflow.visualization.dimflux.src.dim_flux.projection import Projection
+from conceptflow.visualization.dimflux.src.utils.variables import Variables
 
 
 class Realizer():

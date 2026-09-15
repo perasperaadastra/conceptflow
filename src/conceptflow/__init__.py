@@ -11,17 +11,16 @@ from conceptflow.core import (
     FormalContext,
     ManyValuedContext,
 )
+from conceptflow.exploration import (
+    ExplorationBuilder,
+    ExplorationView,
+)
 from conceptflow.visualization import (
     GraphData,
     GraphEdge,
     GraphNode,
     lattice_to_graph_data,
     plot_lattice,
-)
-
-from conceptflow.exploration import (
-    ExplorationBuilder,
-    ExplorationView,
 )
 
 __all__ = [

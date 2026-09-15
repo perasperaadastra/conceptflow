@@ -13,10 +13,10 @@ from pathlib import Path
 
 from conceptflow.core import Concept, ConceptLattice, FormalContext
 from conceptflow.io import write_cxt
-from conceptflow.visualization.graph_data import GraphData, lattice_to_graph_data
 from conceptflow.visualization.dimflux.src.dim_flux.realizer import Realizer
 from conceptflow.visualization.dimflux.src.fdp.forces import ForceDirectedPlacement
 from conceptflow.visualization.dimflux.src.utils.variables import Variables
+from conceptflow.visualization.graph_data import GraphData, lattice_to_graph_data
 
 
 def _sanitize_context(context: FormalContext) -> FormalContext:
